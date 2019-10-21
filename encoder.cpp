@@ -49,32 +49,41 @@ int main(int argc, char* argv[])
     }*/
     
     int index = 0;          // array index
-    char currentArr[256];          // 9-byte block
-    char inChar;            // current char from the read 
-    while (inStream.get(inChar) && index < 256) //get 1 byte at a time
+    char currentArr[256];   // 9-byte block
+    char inChar;            // current char from the read
+
+    while(!inStream.eof())  //loops till the end of file
     {
-        if(inChar == ' ')   //skip space character
+        index = 0;          // array index
+        //currentArr[256];          // 9-byte block
+        //inChar = '';            // current char from the read 
+
+        while (inStream.get(inChar) && index < 256) //get 1 byte at a time
         {
-            inStream.get(inChar);
+            if(inChar == ' ')   //skip space character
+            {
+                inStream.get(inChar);
+            }
+//            cout<<inChar;
+            currentArr[index] = inChar; // move the read char to the current 32 byte sample
+            index = index + 8;          //increment by 1 byte at a time
         }
-        cout<<inChar;
-        currentArr[index] = inChar; // move the read char to the current 32 byte sample
-        index = index + 8;          //increment by 1 byte at a time
+    
+        cout<<endl;
+        currentArr[256] = '\0';
+        string daString = convertToString(currentArr,256);
+//      cout<<currentArr[0]<<currentArr[8]<<currentArr[16]<<currentArr[24]<<endl;       //first 4 bytes of currentArr
+//      cout<<currentArr[32]<<currentArr[40]<<currentArr[48]<<currentArr[56]<<endl;     //second 4 bytes of currentArr
+
+        cout << "index: " << index <<endl;
+        cout <<"strBro: " << daString <<endl;
     }
-
-    cout<<endl;
-    currentArr[256] = '\0';
-    string daString = convertToString(currentArr,256);
-//    cout< currentArr[0]< currentArr[8]< currentArr[16]< currentArr[24]< currentArr[32]< currentArr[40]< currentArr[48]< currentArr[56]<<endl; //first 4 bytes of currentArr 
-
-    cout << "index: " << index <<endl;
-    cout <<"strBro: " << daString <<endl;
 
 //    cout<< "converted:" << stof currentArr)<<endl;
 
 //   std::cout << endl << "Total count: " << i << endl;
 
-    inStream.close();
+    inStream.close();       //close connection with file
 
     return 0;
 }
