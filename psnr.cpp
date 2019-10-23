@@ -16,7 +16,7 @@ using namespace std;
 int main (int argc, char* argv[])
 {
 	ifstream oldInFile("sample_sound.bin", fstream::in | ifstream::binary);
-	ifstream convertedFile("sample_sound.bin", fstream::in | ifstream::binary);
+	ifstream convertedFile("out.raw", fstream::in | ifstream::binary);
 
 	unsigned char temp[sizeof(float)];
 	unsigned char temp2[sizeof(float)];
@@ -28,8 +28,8 @@ int main (int argc, char* argv[])
     float mse = 0;
     float psnr = 0;
     float max = powf(2,31);
-    float first_half = 0;
-	float second_half = 0;
+    float theH = 0;
+	float theH2 = 0;
 
 	while(convertedFile.read(reinterpret_cast<char*>(temp), sizeof(float)))
 	{
@@ -58,10 +58,10 @@ int main (int argc, char* argv[])
 	    t2 = temp2[1];
 	    temp2[1] = temp2[2];
 	    temp2[2] = t2;
-	    otherfloVar = reinterpret_cast<float&>(temp2);
+	    otherFloVar = reinterpret_cast<float&>(temp2);
 	    if(otherFloVar > 1 || otherFloVar < -1)
 	    {
-	    	cout << "wrong old 32 bits float input" << endl;
+	    	cout << "WRONG INPUT" << endl;
 	    	break;
 	    }
 	    oldValue.push_back(otherFloVar);
@@ -73,9 +73,9 @@ int main (int argc, char* argv[])
 		mse = static_cast<float>(mse) + powf((static_cast<float>(oldValue[i]) - static_cast<float>(newValue[i])),2);
 	}
 	mse = static_cast<float>(mse)/static_cast<float>(j);
-	first_half = static_cast<float>(20) * log10(max);
-	second_half = static_cast<float>(10) * log10(static_cast<float>(mse));
-	psnr = static_cast<float>(first_half) - static_cast<float>(second_half);
+	theH = static_cast<float>(20) * log10(max);
+	theH2 = static_cast<float>(10) * log10(static_cast<float>(mse));
+	psnr = static_cast<float>(theH) - static_cast<float>(theH2);
 	cout << psnr << endl;
 
 	oldInFile.close();

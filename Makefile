@@ -21,3 +21,6 @@ clean:
 	rm -f $(TARGET)
 	rm -f $(OBJS)
 	rm -f outFile.txt
+	rm -f out.brr
+	rm -f decOUT.raw
+	rm -f psnr
