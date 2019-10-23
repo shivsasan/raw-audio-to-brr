@@ -21,13 +21,13 @@ string convertToString(char* a, int size)
 void quantize(int arr[], int range)
 {
     cout<<"quaztize1"<<endl;
-    int step_size[13] = {1,2,4,8,16,32,64,256,512,1024,2048,4096};
+    int stepsize[13] = {1,2,4,8,16,32,64,256,512,1024,2048,4096};
     for (int i = 0; i < 16 ; i++)
     {
         cout<<"arr["<<i<<"]: "<<arr[i]<<endl;
-        cout<<"stepsize: "<<step_size[range]<<endl;
+        cout<<"stepsize: "<<stepsize[range]<<endl;
         cout<<"range : "<<range<<endl;
-        arr[i] = arr[i]/(step_size[range]);
+        arr[i] = arr[i]/(stepsize[range]);
         cout<<arr[i]<<" ";
     }
     cout<<"quaztize2"<<endl;
