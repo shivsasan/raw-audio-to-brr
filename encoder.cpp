@@ -4,6 +4,7 @@
 #include <math.h>
 #include <fstream>
 #include <bits/stdc++.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -16,6 +17,22 @@ string convertToString(char* a, int size)
     } 
     return s; 
 } 
+
+void quantize(int arr[], int range)
+{
+    cout<<"quaztize1"<<endl;
+    int step_size[13] = {1,2,4,8,16,32,64,256,512,1024,2048,4096};
+    for (int i = 0; i < 16 ; i++)
+    {
+        cout<<"arr["<<i<<"]: "<<arr[i]<<endl;
+        cout<<"stepsize: "<<step_size[range]<<endl;
+        cout<<"range : "<<range<<endl;
+        arr[i] = arr[i]/(step_size[range]);
+        cout<<arr[i]<<" ";
+    }
+    cout<<"quaztize2"<<endl;
+
+}
 
 int main(int argc, char* argv[])
 {
@@ -34,64 +51,86 @@ int main(int argc, char* argv[])
     ifstream inStream;  //input file stream
     ofstream outStream; //output file stream
 
-    inStream.open(inFile);// ios::binary);
+    inStream.open(inFile, ios::binary);
+    outStream.open("out.brr");
 
-//    float value;
-//    int i = 0; 
-/*    char buf[sizeof(float)];
-    while (inStream.read(buf, sizeof(float)))
+    float value;
+    vector <float> converted;
+    int scale = 32768; //scale
+    unsigned char temp[sizeof(float)];
+    int currentArr[16]; // each index holds 16 bit ints
+    int iter = 0;
+    int max, min;
+    int range;
+//    int step_size[13] = {1,2,4,8,16,32,64,256,512,1024,2048,4096};
+
+    while(inStream.read(reinterpret_cast < char*> (temp), sizeof(float)))
+    {       
+        unsigned char t  = temp[0];
+        temp[0] = temp[3];
+        temp[3] = t;
+        t = temp[1];
+        temp[1] = temp[2];
+        temp[2] = t;
+        value = reinterpret_cast<float&>(temp);
+ //       cout<<"iter: "<<iter<<"\tvalue: "<<value<<endl;
+        if(value > 1 || value < -1)
+        {
+            cout<<"out of range"<<endl;
+            break;
+        }
+        //converted.push_back(int(value*scale));
+        if (iter <= 15)
+        {
+            currentArr[iter] = int(value*scale);
+//            cout<<currentArr[iter]<<endl;
+        }
+        if (iter == 16 ) //after 16 samples
+        {
+            iter = 0;   //reset iter
+            max = *max_element(currentArr,currentArr+16);
+            min = *min_element(currentArr,currentArr+16);
+
+            cout<<"max: " << max<<" min: "<<min<<endl; 
+
+            //range here
+
+            if ( max <= 7 && min >= -8 ){range = 0;}
+            if ( max <= 14 && min >= -16 ){range = 1;}
+            if ( max <= 28 && min >= -32 ){range = 2;}
+            if ( max <= 56 && min >= -64 ){range = 3;}
+            if ( max <= 112 && min >= -128 ){range = 4;}
+            if ( max <= 224 && min >= -256 ){range = 5;}
+            if ( max <= 448 && min >= -512 ){range = 6;}
+            if ( max <= 896 && min >= -1024 ){range = 7;}
+            if ( max <= 1792 && min >= -2048 ){range = 8;}
+            if ( max <= 3584 && min >= -4096 ){range = 9;}
+            if ( max <= 7168 && min >= -8192 ){range = 10;}
+            if ( max <= 14336 && min >= -16384 ){range = 11;}
+            if ( max <= 28672 && min >= -32768 ){range = 12;}
+            else{cout<<"OUT OF RANGE!!!"<<endl;}
+
+            //if (range != 0){quantize(currentArr,range);} //quantizing to nibble
+            quantize(currentArr,range);
+
+            continue;
+        }
+        iter++;
+//        cout<<"iter: "<<iter<<endl;
+
+    }
+
+    for (auto i = converted.begin(); i != converted.end(); ++i) 
     {
-        memcpy(&value, buf, sizeof(value));
-        std::cout << value << " ";
-        float temp =  stof (buf);
-        cout<<"this is a float value -> "<< temp<<endl; 
-        i++;
-    }*/
-    
-    int index = 0;          // array index
-    char currentArr[257];   // 8-byte array to store input
-    char inChar;            // current char from the read
-//    char theEncoded[72];    // array to store 9 byes of data
-    float converted[256];
-
-//    while(!inStream.eof())  //loops till the end of file
-//    {
-        index = 0;              // array index
-
-
-        while (inStream.get(inChar) && index < 256) //get 1 byte at a time
+        //cout<< *i << " ";
+        //outStream<<*i<< " ";
+        for (auto j = converted.begin() ; iter != 16 ; j++) //read the 16 bits
         {
-            if(inChar == ' ')   //skip space character
-            {
-                inStream.get(inChar);
-            }
-//            cout<<inChar;
-            currentArr[index] = inChar; // move the read char to the current 32 byte sample
-            index = index + 8;          //increment by 1 byte at a time
+            currentArr[iter] = *j;
         }
+        iter = 0; //reset iter
 
-        int iter = 0;
-        while (iter != 256)
-        {
-            converted[iter] = static_cast<float>(currentArr[iter]);
-            iter=iter+8;
-        }
-    
-        cout<<endl;
-        currentArr[256] = '\0';         //make last char NULL
-        cout<<"converted: "<<converted<<endl;cout<<"converted8: "<<converted[8]<<endl;cout<<"converted16: "<<converted[16]<<endl;
-        string daString = convertToString(currentArr,256);
-//      cout<<currentArr[0]<<currentArr[8]<<currentArr[16]<<currentArr[24]<<endl;       //first 4 bytes of currentArr
-//      cout<<currentArr[32]<<currentArr[40]<<currentArr[48]<<currentArr[56]<<endl;     //second 4 bytes of currentArr
-
-        cout << "index: " << index <<endl;
-        cout <<"strBro: " << daString <<endl;
-
-//    }
-
-//    cout<< "converted:" << stof currentArr)<<endl;
-
-//   std::cout << endl << "Total count: " << i << endl;
+    }
 
     inStream.close();       //close connection with file
 
